@@ -7,6 +7,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.os.SystemClock;
+import android.util.Log;
 
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
@@ -19,6 +20,16 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] viewMatrix = new float[16];
 
     private float[] rotationMatrix = new float[16];
+
+    public volatile float mAngle;
+
+    public float getAngle() {
+        return mAngle;
+    }
+
+    public void setAngle(float angle) {
+        mAngle = angle;
+    }
 
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
@@ -40,20 +51,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         float[] scratch = new float[16];
 
         // Create a rotation transformation for the triangle
-        long time = SystemClock.uptimeMillis() % 4000L;
-        float angle = 0.090f * ((int) time);
-        Matrix.setRotateM(rotationMatrix, 0, angle, 0, 0, -1.0f);
+        Matrix.setRotateM(rotationMatrix, 0, mAngle, 0, 0, -1.0f);
 
         // Combine the rotation matrix with the projection and camera view
         // Note that the vPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, vPMatrix, 0, rotationMatrix, 0);
 
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
         // Draw triangle
-        //mTriangle.draw(scratch);
+        mTriangle.draw(scratch);
 
         // Draw shape
-        mTriangle.draw(vPMatrix);
+        // mTriangle.draw(vPMatrix);
 
         // Redraw background color
         // GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
