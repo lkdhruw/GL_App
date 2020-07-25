@@ -11,6 +11,7 @@ class MyGLSurfaceView extends GLSurfaceView {
 
         // Create an OpenGL ES 2.0 context
         setEGLContextClientVersion(2);
+        setPreserveEGLContextOnPause(true);
 
         renderer = new MyGLRenderer();
 
@@ -18,6 +19,8 @@ class MyGLSurfaceView extends GLSurfaceView {
         setRenderer(renderer);
 
         // Render the view only when there is a change in the drawing data
-        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        // setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+        // This setting prevents the GLSurfaceView frame from being redrawn
+        // until you call requestRender(), which is more efficient for this sample app.
     }
 }
