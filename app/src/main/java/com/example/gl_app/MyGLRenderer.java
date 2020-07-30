@@ -51,7 +51,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         float[] scratch = new float[16];
 
-
         // Create a rotation transformation for the triangle
         Matrix.setRotateM(rotationMatrix, 0, mAngle, 0, 0, -1.0f);
 
@@ -59,7 +58,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Note that the vPMatrix factor *must be first* in order
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, vPMatrix, 0, rotationMatrix, 0);
-
 
         // Draw triangle
         mTriangle.draw(scratch);
@@ -75,7 +73,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
         float ratio = (float) width / height;
-
+        Log.d("Ratio", Float.toString(ratio));
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);

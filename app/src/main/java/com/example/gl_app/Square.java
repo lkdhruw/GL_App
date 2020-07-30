@@ -19,7 +19,7 @@ public class Square {
             0.5f, -0.5f, 0.0f,   // bottom right
             -0.5f,  0.5f, 0.0f,   // top left
             0.5f, -0.5f, 0.0f,   // bottom right
-            0.5f,  0.5f, 0.0f    // top right
+            0.7f,  0.5f, 0.0f    // top right
     };
 
     // Set color with red, green, blue and alpha (opacity) values
