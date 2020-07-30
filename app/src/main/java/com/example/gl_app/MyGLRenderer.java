@@ -12,7 +12,7 @@ import android.util.Log;
 public class MyGLRenderer implements GLSurfaceView.Renderer {
 
     private Triangle mTriangle;
-    private Square   mSquare;
+    private Square mSquare;
 
     // vPMatrix is an abbreviation for "Model View Projection Matrix"
     private final float[] vPMatrix = new float[16];
@@ -38,17 +38,19 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mTriangle = new Triangle();
         // initialize a square
         mSquare = new Square();
+        // Create a camera view matrix
+        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
     }
 
     public void onDrawFrame(GL10 unused) {
 
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(viewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
         // Calculate the projection and view transformation
         Matrix.multiplyMM(vPMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+        mSquare.draw(vPMatrix);
 
         float[] scratch = new float[16];
+
 
         // Create a rotation transformation for the triangle
         Matrix.setRotateM(rotationMatrix, 0, mAngle, 0, 0, -1.0f);
@@ -58,10 +60,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, vPMatrix, 0, rotationMatrix, 0);
 
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+
         // Draw triangle
         mTriangle.draw(scratch);
-
+        GLES20.glFlush();
         // Draw shape
         // mTriangle.draw(vPMatrix);
 
