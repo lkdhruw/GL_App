@@ -7,25 +7,35 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
+import javax.microedition.khronos.opengles.GL;
+
 public class Square {
     private FloatBuffer vertexBuffer;
-    private ShortBuffer drawListBuffer;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
     static float squareCoords[] = {
+            // Triangle 1
             -0.5f,  0.5f, 0.0f,   // top left
             -0.5f, -0.5f, 0.0f,   // bottom left
             0.5f, -0.5f, 0.0f,   // bottom right
+            // Triangle 2
             -0.5f,  0.5f, 0.0f,   // top left
             0.5f, -0.5f, 0.0f,   // bottom right
-            0.7f,  0.5f, 0.0f    // top right
+            0.5f,  0.5f, 0.0f,    // top right
+            // Line 1
+            -0.5f, 0.0f, 0.0f,
+            0.5f, 0.0f, 0.0f,
+            // Line 2
+            0.0f, 0.5f, 0.0f,
+            0.0f, -0.5f, 0.0f,
+            // Point 1
+            0.45f, 0.45f, 0.0f
     };
 
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 0.93671875f, 0.76953125f, 0.22265625f, 1.0f };
-
-    private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; // order to draw vertices
+    float color2[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
     private final int mProgram;
 
@@ -39,6 +49,7 @@ public class Square {
                     // Note that the uMVPMatrix factor *must be first* in order
                     // for the matrix multiplication product to be correct.
                     "  gl_Position = uMVPMatrix * vPosition;" +
+                    "  gl_PointSize = 10.0;" +
                     "}";
     private int vPMatrixHandle;
 
@@ -77,14 +88,6 @@ public class Square {
         vertexBuffer.put(squareCoords);
         vertexBuffer.position(0);
 
-        // initialize byte buffer for the draw list
-        ByteBuffer dlb = ByteBuffer.allocateDirect(
-                // (# of coordinate values * 2 bytes per short)
-                drawOrder.length * 2);
-        dlb.order(ByteOrder.nativeOrder());
-        drawListBuffer = dlb.asShortBuffer();
-        drawListBuffer.put(drawOrder);
-        drawListBuffer.position(0);
     }
 
     private int positionHandle;
@@ -108,7 +111,6 @@ public class Square {
                 GLES20.GL_FLOAT, false,
                 vertexStride, vertexBuffer);
 
-
         // get handle to fragment shader's vColor member
         colorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
@@ -129,7 +131,12 @@ public class Square {
         GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 3, 3);
+        GLES20.glUniform4fv(colorHandle, 1, color2, 0);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
+        GLES20.glDrawArrays(GLES20.GL_LINES, 8, 2);
+        GLES20.glDrawArrays(GLES20.GL_POINTS, 10, 1);
 
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle);
