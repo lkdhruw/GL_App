@@ -134,10 +134,10 @@ public class Square {
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
         GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 3, 3);
         GLES20.glUniform4fv(colorHandle, 1, color2, 0);
+        GLES20.glLineWidth(3.0f);
         GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
         GLES20.glDrawArrays(GLES20.GL_LINES, 8, 2);
         GLES20.glDrawArrays(GLES20.GL_POINTS, 10, 1);
-
         // Disable vertex array
         GLES20.glDisableVertexAttribArray(positionHandle);
     }
