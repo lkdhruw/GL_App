@@ -82,7 +82,7 @@ public class Triangle {
         // set the buffer to read the first coordinate
         vertexBuffer.position(0);
 
-        colorHandle = GLES20.glGetAttribLocation(mProgram, A_COLOR);
+        colorHandle = GLES20.glGetAttribLocation(mProgram, "a_Color");
     }
 
     private final int vertexCount = triangleCoords.length / COORDS_PER_VERTEX;

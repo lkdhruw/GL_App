@@ -70,6 +70,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // mTriangle.draw();
     }
 
+    private final float[] modelMatrix = new float[16];
+
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
         float ratio = (float) width / height;
@@ -77,6 +79,17 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // this projection matrix is applied to object coordinates
         // in the onDrawFrame() method
         Matrix.frustumM(projectionMatrix, 0, ratio, -ratio, -1, 1, 3, 7);
+        Square.perspectiveM(projectionMatrix, 45, (float) width
+                / (float) height, 1f, 10f);
+        /*
+        Matrix.setIdentityM(modelMatrix, 0);
+        Matrix.translateM(modelMatrix, 0, 0f, 0f, -2.5f);
+        Matrix.rotateM(modelMatrix, 0, -20f, 1f, 0f, 0f);
+        final float[] temp = new float[16];
+        Matrix.multiplyMM(temp, 0, projectionMatrix, 0, modelMatrix, 0);
+        System.arraycopy(temp, 0, projectionMatrix, 0, temp.length);
+        */
+
     }
 
     public static int loadShader(int type, String shaderCode){
