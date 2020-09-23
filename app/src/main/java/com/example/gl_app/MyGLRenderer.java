@@ -74,8 +74,9 @@ public class MyGLRenderer extends Context implements GLSurfaceView.Renderer {
         mSquare = new Square();
         // Create a camera view matrix
         Matrix.setLookAtM(viewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
-        Square.loadTexture(getResources(), R.mipmap.im_farm_field);
+        Context context = MainActivity.context;
+        Square.loadTexture(context, R.mipmap.farm_field_2);
+        GLES20.glFlush();
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -98,7 +99,6 @@ public class MyGLRenderer extends Context implements GLSurfaceView.Renderer {
         // Draw triangle
         mTriangle.draw(scratch);
 
-        GLES20.glFlush();
         // Draw shape
         // mTriangle.draw(vPMatrix);
 

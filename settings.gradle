@@ -1,2 +1,3 @@
+include ':app:Data'
 include ':app'
 rootProject.name = "GL_App"
