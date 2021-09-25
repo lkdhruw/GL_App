@@ -19,21 +19,45 @@ import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.opengles.GL;
 
+
 public class Square {
     private FloatBuffer vertexBuffer;
     @SuppressLint("StaticFieldLeak")
     public static Context context;
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 4;
+    static final int COORDS_PER_TEXTURE = 2;
+    public static final int BYTES_PER_FLOAT = 4;
+    static final int STRIDE = (COORDS_PER_VERTEX + COORDS_PER_TEXTURE)*BYTES_PER_FLOAT;
+
+    private int positionHandle;
+    private int colorHandle;
+
+    private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
+    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
+
     static float squareCoords[] = {
+            // X, Y, Z, Scale, S, T
+            // S, T Coordinates of texture
             // Triangle 1
-            -0.5f,  0.5f, 0.0f, 2.0f,  // top left
-            -0.5f, -0.8f, 0.0f, 1.0f,   // bottom left
-            0.5f, -0.8f, 0.0f, 1.0f,   // bottom right
+            -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // top left
+            -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,   // bottom left
+            0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f,   // bottom right
             // Triangle 2
-            -0.5f,  0.5f, 0.0f, 2.0f,   // top left
-            0.5f, -0.8f, 0.0f, 1.0f,   // bottom right
-            0.5f,  0.5f, 0.0f, 2.0f,    // top right
+            -0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 1.0f,  // top left
+            0.5f, -0.5f, 0.0f, 1.0f,  1.0f, 0.0f,  // bottom right
+            0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 1.0f    // top right
+            /*
+            // Triangle 1
+            -0.5f,  0.5f, 0.0f, 1.0f,  // top left
+            -0.5f, -0.5f, 0.0f, 1.0f,   // bottom left
+            0.5f, -0.5f, 0.0f, 1.0f,   // bottom right
+            // Triangle 2
+            -0.5f,  0.5f, 0.0f, 1.0f,   // top left
+            0.5f, -0.5f, 0.0f, 1.0f,   // bottom right
+            0.5f,  0.5f, 0.0f, 1.0f//,    // top right
+            */
+            /*
             // Line 1
             -0.5f, 0.0f, 0.0f, 1.5f,
             0.5f, 0.0f, 0.0f, 1.5f,
@@ -42,6 +66,7 @@ public class Square {
             0.0f, -0.8f, 0.0f, 1.0f,
             // Point 1
             0.45f, 0.45f, 0.0f, 1.9f
+             */
     };
 
     // Set color with red, green, blue and alpha (opacity) values
@@ -72,12 +97,20 @@ public class Square {
                     "  gl_FragColor = vColor;" +
                     "}";
 
+    private final VertexArray vertexArray;
+
     public Square() {
+        context = MainActivity.context;
+
         // ------------------------
+        String vertexShaderSource = TextResourceReader
+                .readTextFileFromResource(context, R.raw.simple_vertex_shader);
+        String fragmentShaderSource = TextResourceReader
+                .readTextFileFromResource(context, R.raw.simple_fragment_shader);
         int vertexShader = MyGLRenderer.loadShader(GLES20.GL_VERTEX_SHADER,
-                vertexShaderCode);
+                vertexShaderSource);
         int fragmentShader = MyGLRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER,
-                fragmentShaderCode);
+                fragmentShaderSource);
         // create empty OpenGL ES Program
         mProgram = GLES20.glCreateProgram();
 
@@ -90,7 +123,7 @@ public class Square {
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(mProgram);
         // ------------------------
-
+        
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
@@ -100,42 +133,31 @@ public class Square {
         vertexBuffer.put(squareCoords);
         vertexBuffer.position(0);
 
+        vertexArray = new VertexArray(squareCoords);
     }
-
-    private int positionHandle;
-    private int colorHandle;
-
-    private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
-    private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
     public void draw(float[] mvpMatrix) {
         // Add program to OpenGL ES environment
+
         GLES20.glUseProgram(mProgram);
 
         // get handle to vertex shader's vPosition member
         positionHandle = GLES20.glGetAttribLocation(mProgram, "vPosition");
 
         // Enable a handle to the triangle vertices
-        GLES20.glEnableVertexAttribArray(positionHandle);
+        //GLES20.glEnableVertexAttribArray(positionHandle);
 
-        // Prepare the triangle coordinate data
-        GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,
+        // Prepare the triangle coordinate data-
+        /*GLES20.glVertexAttribPointer(positionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
+                vertexStride, vertexBuffer);*/
 
         // get handle to fragment shader's vColor member
         colorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");
 
         // Set color for drawing the triangle
-        GLES20.glUniform4fv(colorHandle, 1, color, 0);
-        /*
-        // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertexCount);
+        //GLES20.glUniform4fv(colorHandle, 1, color, 0);
 
-        // Disable vertex array
-        GLES20.glDisableVertexAttribArray(positionHandle);
-
-         */
         // get handle to shape's transformation matrix
         vPMatrixHandle = GLES20.glGetUniformLocation(mProgram, "uMVPMatrix");
 
@@ -143,80 +165,25 @@ public class Square {
         GLES20.glUniformMatrix4fv(vPMatrixHandle, 1, false, mvpMatrix, 0);
 
         // Draw the triangle
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 3, 3);
+        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 6);
+        //GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 3, 3);
+        /*
         GLES20.glUniform4fv(colorHandle, 1, color3, 0);
         GLES20.glLineWidth(3.0f);
+
         GLES20.glDrawArrays(GLES20.GL_LINES, 6, 2);
         GLES20.glDrawArrays(GLES20.GL_LINES, 8, 2);
         GLES20.glDrawArrays(GLES20.GL_POINTS, 10, 1);
+
+         */
         // Disable vertex array
-        GLES20.glDisableVertexAttribArray(positionHandle);
+        //GLES20.glDisableVertexAttribArray(positionHandle);
     }
 
-    public static void perspectiveM(float[] m, float yFovInDegrees, float aspect,
-                                    float n, float f) {
-        final float angleInRadians = (float) (yFovInDegrees * Math.PI / 180.0);
-        final float a = (float) (1.0 / Math.tan(angleInRadians / 2.0));
-        m[0] = a / aspect;
-        m[1] = 0f;
-        m[2] = 0f;
-        m[3] = 0f;
-        m[4] = 0f;
-        m[5] = a;
-        m[6] = 0f;
-        m[7] = 0f;
-        m[8] = 0f;
-        m[9] = 0f;
-        m[10] = -((f + n) / (f - n));
-        m[11] = -1f;
-        m[12] = 0f;
-        m[13] = 0f;
-        m[14] = -((2f * f * n) / (f - n));
-        m[15] = 0f;
-
-    }
-
-    public static int loadTexture(Context context, int resourceId) {
-        final int[] textureObjectIds = new int[1];
-        GLES20.glGenTextures(1, textureObjectIds, 0);
-        if (textureObjectIds[0] == 0) {
-            Log.e("Texture", "Could not generate a new OpenGL texture object.");
-            return 0;
-        }
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;
-        final Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), resourceId, options);
-        //final Bitmap bitmap = drawableToBitmap(resources);
-        if (bitmap == null) {
-            Log.e("Texture", "Resource ID " + resourceId + " could not be decoded.");
-            GLES20.glDeleteTextures(1, textureObjectIds, 0);
-            return 0;
-        }
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureObjectIds[0]);
-
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR_MIPMAP_LINEAR);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-        bitmap.recycle();
-        GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0);
-        Log.e("TEXTURE", Integer.toString(textureObjectIds[0]));
-        return textureObjectIds[0];
-        
-    }
-
-    public static Bitmap drawableToBitmap (Drawable drawable) {
-
-        if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable)drawable).getBitmap();
-        }
-
-        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
-        drawable.draw(canvas);
-
-        return bitmap;
+    private static final int POSITION_COMPONENT_COUNT = 4;
+    private static final int TEXTURE_COORDINATES_COMPONENT_COUNT = 2;
+    public void bindData(TextureShaderProgram textureProgram) {
+        vertexArray.setVertexAttribPointer(0, textureProgram.getPositionAttributeLocation(), POSITION_COMPONENT_COUNT, STRIDE);
+        vertexArray.setVertexAttribPointer(POSITION_COMPONENT_COUNT,textureProgram.getTextureCoordinatesAttributeLocation(),TEXTURE_COORDINATES_COMPONENT_COUNT,STRIDE);
     }
 }
